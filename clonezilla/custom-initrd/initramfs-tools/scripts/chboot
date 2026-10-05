@@ -249,11 +249,19 @@ local_device_setup()
 	DEV="${real_dev}"
 }
 
+chboot_gzip(){
+	gzip > "$1"
+}
+
 chboot_compression_cmd(){
 	IMAGE_NAME="$1"
 	COMPRESS_MODE="$2"
 	CTYPE="$(echo "$IMAGE_NAME" |sed -e "s%\.parts$%%;s%^.*\.%%")"
 	case "$CTYPE" in
+		gz)
+			CMD="chboot_gzip"
+			UNCMD="gzip -cd"
+			;;
 		xz)
 			CMD="xz -9e -c"
 			#UNCMD="xz --decompress -c"
