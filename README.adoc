@@ -14,7 +14,7 @@ Luis Garcia
 :imagesdir: ./images
 
 ## Abstract
-This plugin for lliurex-chboot provides functionality to restore (and save) system partition from a compressed image using partclone.
+This plugin for lliurex-chboot provides functionality to restore (and save) system partition using partclone and a compressed image file.
 
 The program works in much the same way as the save/restore partition options in clonezilla, but in a fully automated manner. In addition, chboot-partition-roller also reinstalls GRUB and preserves some essential settings and files from the original system to ensure the computer works properly after the image has been installed. Any differences in partition name or size between the image and the installation destination are also handled automatically.
 
