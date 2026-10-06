@@ -10,11 +10,16 @@ UID_MAX=30000
 USERS_BLACK_LIST="estudiant nobody guest-user"
 
 get_local_users(){
-	UID_MIN="$UID_MIN" UID_MAX="$UID_MAX" awk -F: '$3>=ENVIRON["UID_MIN"] && $3<=ENVIRON["UID_MAX"] {print $1":"$3}' /etc/passwd
+	UID_MIN="$UID_MIN" UID_MAX="$UID_MAX" awk -F: '$3>=ENVIRON["UID_MIN"] && $3<=ENVIRON["UID_MAX"] {print $0}' /etc/passwd
 }
 
 
+get_local_users |while IFS=":" read LUSER dummy1 LUID LGID LGECOS LHOME LSHELL ; do
+	echo "$LUSER $LSHELL"
+done
 
-cat /etc/passwd |sort -n -t ":" -k 3 
 
-tar -C /etc/lliurex-auto-upgrade/ -cvzf "DEST_FILE" tags/
+
+#cat /etc/passwd |sort -n -t ":" -k 3 
+
+#tar -C /etc/lliurex-auto-upgrade/ -cvzf "DEST_FILE" tags/
