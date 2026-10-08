@@ -5,6 +5,14 @@
 # Simple tool to prepare chboot-part-roller files
 #
 
+UID_MIN=1000
+UID_MAX=30000
+USERS_BLACK_LIST="estudiant nobody guest-user"
+
+GID_MIN=1000
+GID_MAX=30000
+GROUPS_BLACK_LIST="estudiant nobody guest-user"
+
 
 die(){
 	echo "$1" >&2
@@ -104,6 +112,10 @@ gen_grub_cfg(){
 		CHBOOT_URL_OPTION="chb.url=$CHBOOT_URL"
 		chboot_entry >>  "$GRUB_CFG"
 	fi
+
+	# last check
+	[ -s "$GRUB_CFG" ] || return 1
+	return 0
 }
 
 chboot_entry(){
@@ -147,7 +159,7 @@ install_boot_files(){
 	return $rc
 }
 
-preserve_files(){
+save_files(){
 	FILE_LIST="$1"
 	DEST_DIR="$2/files"
 	mkdir -p "$DEST_DIR"
@@ -169,11 +181,84 @@ preserve_files(){
 	done
 }
 
+
+get_local_ids(){
+	ID_MIN="$1"
+	ID_MAX="$2"
+	ID_FILE="$3"
+        ID_MIN="$ID_MIN" ID_MAX="$ID_MAX" awk -F: '$3>=ENVIRON["ID_MIN"] && $3<=ENVIRON["ID_MAX"] {print $0}' "$ID_FILE"
+}
+
+get_local_users(){
+	get_local_ids $UID_MIN $UID_MAX /etc/passwd
+}
+
+get_local_groups(){
+	get_local_ids $GID_MIN $GID_MAX /etc/group
+}
+
+chboot_user_info(){
+	cat <<EOF
+UID_MIN='$UID_MIN'
+UID_MAX='$UID_MAX'
+GID_MIN='$GID_MIN'
+GID_MAX='$GID_MAX'
+USERS_BLACK_LIST='$USERS_BLACK_LIST'
+GROUPS_BLACK_LIST='$GROUPS_BLACK_LIST'
+EOF
+}
+
+save_users(){
+	DEST_DIR="$1/users"
+	SYS_DIR="/etc"
+	USER_FILE="passwd"
+	SHADOW_FILE="shadow"
+	GROUP_FILE="group"
+	GSHADOW_FILE="ghadow"
+	INFO_FILE="users.cfg"
+	mkdir -p "$DEST_DIR"
+
+	# preserve local user and group configuration
+	chboot_user_info > "$DEST_DIR/$INFO_FILE"
+
+	#DEST_DIR="$CHBOOT_DIR/users"
+	#echo "Preserve local users ..."
+	for f in $USER_FILE $SHADOW_FILE $GROUP_FILE $GSHADOW_FILE ; do
+		F="$DEST_DIR/$f"
+		:> $F
+		chmod 640 $F
+	done
+	# save local user data
+	for u in $(get_local_users) ; do
+		if ! echo " $USERS_BLACK_LIST " | grep -q " $u " ; then
+			for f in $USER_FILE $SHADOW_FILE ; do
+				grep "^${u}:" $SYS_DIR/$f >> $DEST_DIR/$f
+			done
+		fi
+	done
+
+	# save local group data
+	for g in $(get_local_groups) ; do
+		if ! echo " $GROUPS_BLACK_LIST " | grep -q " $g " ; then
+			for f in $GROUP_FILE $GSHADOW_FILE ; do
+				grep "^${g}:" $SYS_DIR/$f >> $DEST_DIR/$f
+			done
+		fi
+	done
+
+	# final check
+	for f in $INFO_FILE $USER_FILE $SHADOW_FILE $GROUP_FILE $GSHADOW_FILE ; do
+		[ -r "$DEST_DIR/$f" ] || return 1
+	done
+	return 0
+}
+
 ############
 ### main ###
 ############
 #
 #
+[ $(id -u) -eq 0 ] || error_msg "You must run this program as root"
 
 [ "$1" ] || usage
 ACTION="$1"
@@ -184,20 +269,18 @@ CHBOOT_BASE_DIR="$2"
 
 case "$ACTION" in
 	mkinitrd)
-		install_boot_files "$CHBOOT_BASE_DIR/boot"
+		install_boot_files "$CHBOOT_BASE_DIR/boot" || error_msg "Unable to install vmlinuz and initrd files in $CHBOOT_BASE_DIR/boot"
 		;;
 	gengrub)
-		gen_grub_cfg "$CHBOOT_BASE_DIR"
+		gen_grub_cfg "$CHBOOT_BASE_DIR" || error_msg "Unable to generate grub.cfg file in $CHBOOT_BASE_DIR"
 		;;
 	saveusers)
-		#USER_LIST_FILE="/usr/share/chboot-part-roller/preserve-user.list"
-		FILE_LIST_FILE="./preserve-user.txt"
-		echo "Not implemented"
+		save_users "$CHBOOT_BASE_DIR/data" || error_msg "Unable to save local users info to $CHBOOT_BASE_DIR/data"
 		;;
 	savefiles)
 		#FILE_LIST_FILE="/usr/share/chboot-part-roller/preserve-file.list"
 		FILE_LIST_FILE="./preserve-list.txt"
-		preserve_files "$FILE_LIST_FILE" "$CHBOOT_BASE_DIR/data"
+		save_files "$FILE_LIST_FILE" "$CHBOOT_BASE_DIR/data"
 		;;
 esac
 
