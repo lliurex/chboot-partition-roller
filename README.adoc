@@ -13,6 +13,7 @@ Luis Garcia
 :sectnums:
 :imagesdir: ./images
 
+image::chboot-part-roller.svg[]
 ## Abstract
 This plugin for lliurex-chboot provides functionality to restore (and save) system partition using partclone and a compressed image file.
 
