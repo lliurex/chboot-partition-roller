@@ -3,16 +3,34 @@
 #  Description:
 #
 # Simple tool to prepare chboot-part-roller files
-#
 
-UID_MIN=1000
-UID_MAX=30000
+
+
+# try to guess ID values from /etc/login.defs 
+LOGIN_DEFS="/etc/login.defs"
+get_defs(){
+	VAR_NAME="$1"
+	[ -r "$LOGIN_DEFS" ] || return 0
+	sed -ne "/^${VAR_NAME}\s/{s%^${VAR_NAME}\s\+%%;p}" "${LOGIN_DEFS}"
+}
+
+UID_MIN="$(get_defs 'UID_MIN')"
+[ "$UID_MIN" ] || UID_MIN=1000
+
+UID_MAX="$(get_defs 'UID_MAX')"
+[ "$UID_MAX" ] || UID_MAX=60000
+
 USERS_BLACK_LIST="estudiant nobody guest-user"
 
-GID_MIN=1000
-GID_MAX=30000
+GID_MIN="$(get_defs 'GID_MIN')"
+[ "$GID_MIN" ] || GID_MIN=1000
+
+GID_MAX="$(get_defs 'GID_MAX')"
+[ "$GID_MAX" ] || GID_MAX=60000
+
 GROUPS_BLACK_LIST="estudiant nobody guest-user"
 
+LOCAL_USERS_MODE="saved-users"
 
 die(){
 	echo "$1" >&2
@@ -161,7 +179,7 @@ install_boot_files(){
 
 save_files(){
 	FILE_LIST="$1"
-	DEST_DIR="$2/files"
+	DEST_DIR="$2/saved-files"
 	mkdir -p "$DEST_DIR"
 	#DEST_DIR="$CHBOOT_DIR/files"
 	#echo "Preserve files from $FILE_LIST ..."
@@ -182,6 +200,13 @@ save_files(){
 }
 
 
+get_nonlocal_ids(){
+	ID_MIN="$1"
+	ID_MAX="$2"
+	ID_FILE="$3"
+        ID_MIN="$ID_MIN" ID_MAX="$ID_MAX" awk -F: '$3<ENVIRON["ID_MIN"] || $3>ENVIRON["ID_MAX"] {print $0}' "$ID_FILE"
+}
+
 get_local_ids(){
 	ID_MIN="$1"
 	ID_MAX="$2"
@@ -199,6 +224,7 @@ get_local_groups(){
 
 chboot_user_info(){
 	cat <<EOF
+LOCAL_USERS_MODE='$LOCAL_USERS_MODE'
 UID_MIN='$UID_MIN'
 UID_MAX='$UID_MAX'
 GID_MIN='$GID_MIN'
@@ -209,35 +235,44 @@ EOF
 }
 
 save_users(){
-	DEST_DIR="$1/users"
+	DEST_DIR="$1/saved-users"
 	SYS_DIR="/etc"
 	USER_FILE="passwd"
 	SHADOW_FILE="shadow"
 	GROUP_FILE="group"
 	GSHADOW_FILE="ghadow"
+	USER_SYSGROUPS="user-sysgroups"
 	INFO_FILE="users.cfg"
 	mkdir -p "$DEST_DIR"
 
-	# preserve local user and group configuration
-	chboot_user_info > "$DEST_DIR/$INFO_FILE"
-
-	#DEST_DIR="$CHBOOT_DIR/users"
-	#echo "Preserve local users ..."
-	for f in $USER_FILE $SHADOW_FILE $GROUP_FILE $GSHADOW_FILE ; do
+	# create files and restrict access
+	for f in $USER_FILE $SHADOW_FILE $GROUP_FILE $GSHADOW_FILE $USER_SYSGROUPS $INFO_FILE; do
 		F="$DEST_DIR/$f"
 		:> $F
 		chmod 640 $F
 	done
+
+	# preserve local user and group configuration
+	chboot_user_info > "$DEST_DIR/$INFO_FILE"
+
 	# save local user data
 	for u in $(get_local_users) ; do
 		if ! echo " $USERS_BLACK_LIST " | grep -q " $u " ; then
 			for f in $USER_FILE $SHADOW_FILE ; do
 				grep "^${u}:" $SYS_DIR/$f >> $DEST_DIR/$f
 			done
+			# save user membership for non local groups (grep user in /etc/group and filter by GID, then cut first field to get only groupname)
+			EXTRA_SYSTEM_GROUPS="$(grep "\(:\|,\)${u}\(,\|$\)" /etc/group |get_nonlocal_ids $GID_MIN $GID_MAX - |cut -f 1 -d ':')"
+			# if list is not empy, write data to USER_SYSGROUPS file
+			if [ "$EXTRA_SYSTEM_GROUPS" ] ; then
+				# 'repack' the user system groups list in a single line using colon (':') as separator, remove ending colon and insert username at the beginning of the line
+				# then, write user line to 'USER_SYSGROUPS' file
+				echo "${EXTRA_SYSTEM_GROUPS}" |tr "\n" ":" |sed -e "s%:$%%;s%^%${u}:%" >> "${DEST_DIR}/${USER_SYSGROUPS}"
+			fi
 		fi
 	done
 
-	# save local group data
+	# save local group data (including user membership and gshadow)
 	for g in $(get_local_groups) ; do
 		if ! echo " $GROUPS_BLACK_LIST " | grep -q " $g " ; then
 			for f in $GROUP_FILE $GSHADOW_FILE ; do
