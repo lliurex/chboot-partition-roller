@@ -8,6 +8,7 @@ export CHB_DEV=
 export CHB_GRUB=
 export ROOT_DEV=
 export CHB_DIR=
+export CHB_IMG_DIR=
 export CHB_FLAGS=
 export CHB_DATA_DIR="/data"
 export CHB_URL=""
@@ -37,12 +38,14 @@ for x in $(cat /proc/cmdline); do
         chb.grub=*) 
                 CHB_GRUB=${x#chb.grub=}
                 ;;
-
         chb.url=*) 
                 CHB_URL=${x#chb.url=}
                 ;;
-        chb.img=*) 
-                CHB_IMG_NAME=${x#chb.img=}
+        chb.imgname=*) 
+                CHB_IMG_NAME=${x#chb.imgname=}
+                ;;
+        chb.imgdir=*) 
+                CHB_IMG_DIR=${x#chb.imgdir=}
                 ;;
         chb.uuid=*) 
                 CHB_ROOT_UUID=${x#chb.uuid=}
@@ -56,8 +59,8 @@ for x in $(cat /proc/cmdline); do
         esac
 done
 
-for v in "$CHB_EFI" "$CHB_DEV" "$CHB_DIR" "$CHB_ROOT_UUID" ; do
-	[ "${v}" ] || panic "Boot arguments must include chb.uuid=, chb.efi=, chb.dev= and chb.dir= parameters. Dropping to a shell!"
+for v in "$CHB_EFI" "$CHB_DEV" "$CHB_DIR" "$CHB_ROOT_UUID" "$CHB_IMG_DIR" ; do
+	[ "${v}" ] || panic "Boot arguments must include chb.uuid=, chb.efi=, chb.dev= chb.dir= and chb.imgdir= parameters. Dropping to a shell!"
 done
 
 chboot_reboot(){
@@ -298,10 +301,10 @@ chboot_get_image(){
 			done
 		fi
 		for f in $CHB_IMG_LIST ; do
-			F="${chbmnt}/${CHB_DIR}/${f}"
+			F="${chbmnt}/${CHB_IMG_DIR}/${f}"
 			[ ! -r "$F" ] || CHB_IMG_FILE="$F"
 		done
-fi
+	fi
 	echo "$CHB_IMG_FILE"
 }
 
@@ -309,12 +312,13 @@ fi
 chboot_save_image(){
 	rc=0
 	if [ -z "$CHB_IMG_NAME" ] ; then
+		# first image extesion act as default
 		DEF_IMG_EXT="$(echo "$CHB_IMG_EXTS" |sed -e "s%\s.*$%%")"
 		CHB_IMG_NAME="${CHB_IMG_BASE}.${DEF_IMG_EXT}"
 	fi
-	IMG_DIR="${chbmnt}/${CHB_DIR}"
+	IMG_DIR="${chbmnt}/${CHB_IMG_DIR}"
 	mkdir -p "$IMG_DIR"
-	CHB_IMG_FILE="${IMG_DIR}/$CHB_IMG_NAME"
+	CHB_IMG_FILE="${IMG_DIR}/${CHB_IMG_NAME}"
 	ROOT="$1"
 	# Get root filesystem type
 	ROOTFSTYPE="$(get_fstype "${ROOT}")"
