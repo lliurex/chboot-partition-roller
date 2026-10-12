@@ -32,6 +32,8 @@ GROUPS_BLACK_LIST="estudiant nobody guest-user"
 
 LOCAL_USERS_MODE="saved-users"
 
+INITRAMFS_DIR="/usr/share/chboot-partition-roller/initramfs-tools"
+
 die(){
 	echo "$1" >&2
 	exit 1
