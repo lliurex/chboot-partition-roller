@@ -48,7 +48,7 @@ error_msg(){
 }
 
 usage(){
-	die "Usage: $(basename "$0") {mkinitrd|gengrub|saveusers|savefiles} CHBOOT_BASE_DIR"
+	die "Usage: $(basename "$0") {mkinitrd|gengrub|saveusers|savefilesi|installgrub} CHBOOT_BASE_DIR"
 }
 
 get_disk_id(){
@@ -140,7 +140,10 @@ gen_grub_cfg(){
 }
 
 chboot_entry(){
-	
+	#pkgdatadir=/usr/lib/grub
+        #GRUB_THEME=""
+        #. /etc/grub.d/00_header
+
 	cat <<EOF
 set timeout=10
 search --no-floppy --fs-uuid --set=root ${CHBOOT_UUID}
@@ -291,6 +294,20 @@ save_users(){
 	return 0
 }
 
+install_grub(){
+        BOOT_DIR="$1"
+	# determine default boot edfi entry
+	BOOT_ENTRY="Boot$(efibootmgr |sed -ne "/^BootOrder:/{s%^.*:\s*%%;s%,.*%%;p}")"
+	# determine grub installation PARTUUID
+	GRUB_PARTUUID="$(efibootmgr -v |grep "^$BOOT_ENTRY" |cut -f 3 -d ",")"
+	# get parent device from PARTUUID
+	GRUB_DEVICE="$(lsblk -nplo PARTUUID,PKNAME |sed -ne "/^${GRUB_PARTUUID}\s/{s%^.*\s%%;p}")"
+
+	mkdir -p "$BOOT_DIR"
+        grub-install "$GRUB_DEVICE" --efi-directory=/boot/efi --boot-directory="$BOOT_DIR"
+}
+
+
 ############
 ### main ###
 ############
@@ -311,6 +328,9 @@ case "$ACTION" in
 		;;
 	gengrub)
 		gen_grub_cfg "$CHBOOT_BASE_DIR" || error_msg "Unable to generate grub.cfg file in $CHBOOT_BASE_DIR"
+		;;
+	installgrub)
+		install_grub "$CHBOOT_BASE_DIR/boot" || error_msg "Unable to install grub in $CHBOOT_BASE_DIR"
 		;;
 	saveusers)
 		save_users "$CHBOOT_BASE_DIR/data" || error_msg "Unable to save local users info to $CHBOOT_BASE_DIR/data"
