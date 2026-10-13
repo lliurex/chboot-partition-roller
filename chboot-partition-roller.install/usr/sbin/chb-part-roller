@@ -48,7 +48,7 @@ error_msg(){
 }
 
 usage(){
-	die "Usage: $(basename "$0") {mkinitrd|gengrub|saveusers|savefilesi|installgrub} CHBOOT_BASE_DIR"
+	die "Usage: $(basename "$0") {mkinitrd|gengrub|saveusers|savefiles|installgrub} CHBOOT_BASE_DIR"
 }
 
 get_disk_id(){
@@ -246,7 +246,7 @@ save_users(){
 	USER_FILE="passwd"
 	SHADOW_FILE="shadow"
 	GROUP_FILE="group"
-	GSHADOW_FILE="ghadow"
+	GSHADOW_FILE="gshadow"
 	USER_SYSGROUPS="user-sysgroups"
 	INFO_FILE="users.cfg"
 	mkdir -p "$DEST_DIR"
