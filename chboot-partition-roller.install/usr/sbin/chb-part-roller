@@ -33,6 +33,7 @@ GROUPS_BLACK_LIST="estudiant nobody guest-user"
 LOCAL_USERS_MODE="saved-users"
 
 INITRAMFS_DIR="/usr/share/chboot-partition-roller/initramfs-tools"
+FILE_LIST_FILE="/usr/share/chboot-partition-roller/saved-files.list"
 
 die(){
 	echo "$1" >&2
@@ -315,8 +316,6 @@ case "$ACTION" in
 		save_users "$CHBOOT_BASE_DIR/data" || error_msg "Unable to save local users info to $CHBOOT_BASE_DIR/data"
 		;;
 	savefiles)
-		#FILE_LIST_FILE="/usr/share/chboot-part-roller/preserve-file.list"
-		FILE_LIST_FILE="./preserve-list.txt"
 		save_files "$FILE_LIST_FILE" "$CHBOOT_BASE_DIR/data"
 		;;
 esac
