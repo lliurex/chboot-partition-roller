@@ -21,6 +21,7 @@ UID_MAX="$(get_defs 'UID_MAX')"
 [ "$UID_MAX" ] || UID_MAX=60000
 
 USERS_BLACK_LIST="estudiant nobody guest-user"
+SPECIAL_USERS="root"
 
 GID_MIN="$(get_defs 'GID_MIN')"
 [ "$GID_MIN" ] || GID_MIN=1000
@@ -248,6 +249,7 @@ SHADOW_FILE='$SHADOW_FILE'
 GROUP_FILE='$GROUP_FILE'
 GSHADOW_FILE='$GSHADOW_FILE'
 USER_SYSGROUPS='$USER_SYSGROUPS'
+SPECIAL_USERS='$SPECIAL_USERS'
 EOF
 }
 
@@ -299,6 +301,14 @@ save_users(){
 			done
 		fi
 	done
+
+	if [ "$SPECIAL_USERS" ] ; then
+		f="$SHADOW_FILE"
+		for u in $SPECIAL_USERS ; do
+			# save shadow data to SHADOW FILE
+			grep "^${u}:" $SYS_DIR/$f >> $DEST_DIR/$f
+		done
+	fi
 
 	# final check
 	for f in $INFO_FILE $USER_FILE $SHADOW_FILE $GROUP_FILE $GSHADOW_FILE ; do
