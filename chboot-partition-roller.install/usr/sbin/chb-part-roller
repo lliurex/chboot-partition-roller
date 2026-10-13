@@ -167,6 +167,31 @@ search --no-floppy --fs-uuid --set=oldroot ${ROOT_UUID}
 if [ -e (\$oldroot)/boot/grub/grub.cfg ] ; then
 	menuentry 'Run old grub configuration to start LliureX' {
 		configfile (\$oldroot)/boot/grub/grub.cfg 
+LOGIN_DEFS="/etc/login.defs"
+get_defs(){
+        VAR_NAME="$1"
+        [ -r "$LOGIN_DEFS" ] || return 0
+        sed -ne "/^${VAR_NAME}\s/{s%^${VAR_NAME}\s\+%%;p}" "${LOGIN_DEFS}"
+}
+
+UID_MIN="$(get_defs 'UID_MIN')"
+[ "$UID_MIN" ] || UID_MIN=1000
+        
+UID_MAX="$(get_defs 'UID_MAX')"
+[ "$UID_MAX" ] || UID_MAX=60000
+        
+USERS_BLACK_LIST="estudiant nobody guest-user"
+
+GID_MIN="$(get_defs 'GID_MIN')"
+[ "$GID_MIN" ] || GID_MIN=1000
+        
+GID_MAX="$(get_defs 'GID_MAX')"
+[ "$GID_MAX" ] || GID_MAX=60000
+        
+GROUPS_BLACK_LIST="estudiant nobody guest-user"
+        
+LOCAL_USERS_MODE="saved-users"
+
 	}
 fi
 
@@ -217,7 +242,7 @@ get_local_ids(){
 	ID_MIN="$1"
 	ID_MAX="$2"
 	ID_FILE="$3"
-        ID_MIN="$ID_MIN" ID_MAX="$ID_MAX" awk -F: '$3>=ENVIRON["ID_MIN"] && $3<=ENVIRON["ID_MAX"] {print $0}' "$ID_FILE"
+        ID_MIN="$ID_MIN" ID_MAX="$ID_MAX" awk -F: '$3>=ENVIRON["ID_MIN"] && $3<=ENVIRON["ID_MAX"] {print $1}' "$ID_FILE"
 }
 
 get_local_users(){
