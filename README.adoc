@@ -13,7 +13,7 @@ Luis García
 :sectnums:
 :imagesdir: ./images
 
-## Abstract
+## Overview
 
 image::chboot-part-roller.svg[]
 
@@ -22,4 +22,14 @@ This plugin for lliurex-chboot provides functionality to restore (and save) syst
 The program works in much the same way as the save/restore partition options in clonezilla, but in a fully automated manner. In addition, chboot-partition-roller also reinstalls GRUB and preserves some essential settings and files from the original system to ensure the computer works properly after the image has been installed. Any differences in partition name or size between the image and the installation destination are also handled automatically.
 
 The intended use is to simplify and automate the upgrade between major versions of the operating system using an image created from an installation of the new version of the system.
+
+## How it works
+
+The plugin generates a custom initrd file (for the running kernel) with the partclone binary, disk and compression tools and some init scripts. No root partition filesystem is required for the boot process, the ramdisk includes all the required tools to restore (or create) a system image, but disk storage is needed for the image file (and some additional data).
+
+Partition roller is a generic tool to manage parclone images but it does not provide any specific image file. The package includes a main script 'chb-part-roller' to manage all the functionality, together with the required files, directory structure and hooks to integrate with lliurex-chboot tool, but to operate, ypu must specify which image file should be used.
+
+The image file can be generated using the software itself, but (almost) any partition image file generated with partclone can be used, including existing backup images generated with clonezilla. In particular, the package 'lliurex25-OEM-part-roller' can be used to download (or copy) a generic LliureX 25 image to upgrade an existing LliureX 23 OEM instalation.
+
+## Operation details
 
