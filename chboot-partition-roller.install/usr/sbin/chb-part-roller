@@ -28,7 +28,7 @@ GID_MIN="$(get_defs 'GID_MIN')"
 GID_MAX="$(get_defs 'GID_MAX')"
 [ "$GID_MAX" ] || GID_MAX=60000
 
-GROUPS_BLACK_LIST="estudiant nobody guest-user"
+GROUPS_BLACK_LIST=""
 
 LOCAL_USERS_MODE="saved-users"
 
@@ -217,7 +217,7 @@ get_local_ids(){
 	ID_MIN="$1"
 	ID_MAX="$2"
 	ID_FILE="$3"
-        ID_MIN="$ID_MIN" ID_MAX="$ID_MAX" awk -F: '$3>=ENVIRON["ID_MIN"] && $3<=ENVIRON["ID_MAX"] {print $1}' "$ID_FILE"
+        ID_MIN="$ID_MIN" ID_MAX="$ID_MAX" awk -F: '$3>=ENVIRON["ID_MIN"] && $3<=ENVIRON["ID_MAX"] {print $0}' "$ID_FILE"
 }
 
 get_local_users(){
@@ -226,6 +226,12 @@ get_local_users(){
 
 get_local_groups(){
 	get_local_ids $GID_MIN $GID_MAX /etc/group
+}
+
+get_field(){
+        DATA="$1"
+        NUMFIELD="$2"
+        echo "$DATA" |cut -f $NUMFIELD -d ":"
 }
 
 chboot_user_info(){
@@ -237,6 +243,11 @@ GID_MIN='$GID_MIN'
 GID_MAX='$GID_MAX'
 USERS_BLACK_LIST='$USERS_BLACK_LIST'
 GROUPS_BLACK_LIST='$GROUPS_BLACK_LIST'
+USER_FILE='$USER_FILE'
+SHADOW_FILE='$SHADOW_FILE'
+GROUP_FILE='$GROUP_FILE'
+GSHADOW_FILE='$GSHADOW_FILE'
+USER_SYSGROUPS='$USER_SYSGROUPS'
 EOF
 }
 
@@ -262,7 +273,8 @@ save_users(){
 	chboot_user_info > "$DEST_DIR/$INFO_FILE"
 
 	# save local user data
-	for u in $(get_local_users) ; do
+	for UDATA in $(get_local_users) ; do
+	        u="$(_get_field "$UDATA" 1)"
 		if ! echo " $USERS_BLACK_LIST " | grep -q " $u " ; then
 			for f in $USER_FILE $SHADOW_FILE ; do
 				grep "^${u}:" $SYS_DIR/$f >> $DEST_DIR/$f
@@ -279,7 +291,8 @@ save_users(){
 	done
 
 	# save local group data (including user membership and gshadow)
-	for g in $(get_local_groups) ; do
+	for GDATA in $(get_local_groups) ; do
+	        g="$(_get_field "$GDATA" 1)"
 		if ! echo " $GROUPS_BLACK_LIST " | grep -q " $g " ; then
 			for f in $GROUP_FILE $GSHADOW_FILE ; do
 				grep "^${g}:" $SYS_DIR/$f >> $DEST_DIR/$f
