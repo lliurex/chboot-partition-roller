@@ -442,10 +442,10 @@ chboot_mount_root(){
 
 	chboot_cp_root_files || panic "Error copying files to root filesystem"
 	chboot_install_grub "$CHB_GRUB" || panic "Error installing grub"
+	chboot_manage_users || panic "Error updating user and group information"
 	sync
 	REBOOT_DELAY=10
 	echo "All done!"
-	echo " Rebooting in $REBOOT_DELAY seconds"
 	while [ $REBOOT_DELAY -gt 0 ] ; do
 		echo " Rebooting in $REBOOT_DELAY seconds"
 		sleep 1
@@ -510,6 +510,108 @@ _not_empty_dir(){
 		rc=0
 	fi
 	return $rc
+}
+
+_get_local_ids(){
+        ID_MIN="$1"
+        ID_MAX="$2"
+        ID_FILE="$3"
+        ID_MIN="$ID_MIN" ID_MAX="$ID_MAX" awk -F: '$3>=ENVIRON["ID_MIN"] && $3<=ENVIRON["ID_MAX"] {print $0}' "$ID_FILE"
+}               
+                        
+_get_local_users(){
+	FILE="$rootmnt/etc/passwd"
+	[ -z "$1" ] || FILE="$1"    
+        get_local_ids $UID_MIN $UID_MAX $FILE
+}                       
+                        
+_get_local_groups(){     
+	FILE="$rootmnt/etc/group"
+	[ -z "$1" ] || FILE="$1"    
+        get_local_ids $GID_MIN $GID_MAX $FILE
+}                               
+
+_get_field(){
+	DATA="$1"
+	NUMFIELD="$2"
+	echo "$DATA" |cut -f $NUMFIELD -d ":"
+}
+
+_replace_line_for(){
+	NAME="$1"
+	TARGET_FILE="$2"
+	SOURCE_FILE="$3"
+	# remove line in first file
+	sed -i -e "/^${NAME}:/d" "$TARGET_FILE" || true
+	# add line from second file
+	grep "^${NAME}:" "$SOURCE_FILE" >> "$TARGET_FILE" ||true
+	return 0
+}
+
+chboot_manage_users(){
+	rc=0
+	SOURCE_DIR="${chbmnt}/${CHB_DIR}/${CHB_DATA_DIR}/saved-users"
+	SOURCE_FILE="${SOURCE_DIR}/users.cfg"
+	if [ ! -r "$SOURCE_FILE" ] || [ ! -s "$SOURCE_FILE" ] ; then
+		return 0
+	fi
+
+	# TODO: consider risks of sourcing an script file in chboot partition and 
+	#       use an alternative method to parse data
+	. $SOURCE_FILE
+
+	# TODO: manage alternative modes, at this moment, only 'saved-users' mode is supported
+	[ "$LOCAL_USERS_MODE" = "saved-users" ] || return 0
+
+	# check variables
+	for v in "$$UID_MIN" "$UID_MAX" "$GID_MIN" "$GID_MAX" ; do
+		[ "$v" ] || return 10
+	done  
+
+	# check required files or return error
+	for f in $USER_FILE $SHADOW_FILE $GROUP_FILE $GSHADOW_FILE $USER_SYSGROUPS ; do
+		F="$SOURCE_DIR/$f"
+		if [ -z "$f" ] || [ ! -r "$F" ] || [ ! -s "$F" ] ; then
+			return 20
+		fi
+	done
+	# 1 remove ALL non system users from chroot (to ensure we can preserve UIDs)
+	rc=0
+	for UDATA in $(_get_local_users) ; do
+		u="$(_get_field "$UDATA" 1)"
+		# use 'deluser' to remove user from groups and home deirectory
+		chroot "$rootmnt" deluser --remove-home "$u" || rc=$?
+	done
+	[ $rc -eq 0 ] || return 1
+	# 2 remove ALL non system groups from chroot (to ensure we can preserve GIDs)
+	for GDATA in $(_get_local_groups) ; do
+		g="$(_get_field "$GDATA" 1)"
+		# use 'delgroup'
+		chroot "$rootmnt" delgroup "$g" || rc=$?
+	done
+	[ $rc -eq 0 ] || return 2
+
+	# 3 'insert' local groups including gshadow data
+	for f in ${GROUP_FILE} ${GSHADOW_FILE} ; do
+		cat "${SOURCE_DIR}/${f}" >> "${rootmnt}/etc/${f}"
+	done
+	
+	# 4 create local users, 5 add to system groups and 6 replace lines in /etc/passwd and /etc/shadow to mantain passwords and user settings
+	# Use useradd to ensure home dir creation and copy of /etc/skel files
+	while IFS=":" read u_name dummy1 u_id u_gid u_gecos u_home u_shell ; do
+		# 4 include minimal set of parameters to create home and avoid new UID or GID creation
+		chroot "$rootmnt" useradd -D -m -N -s -u "$u_id" -d "$u_home" -g "$u_gid" "$u_name" || return 4
+		# 5 iterate over system groups for the user, verify the group exists and then, add user to that group
+		for g in $(grep "^${u_name}:" "${SOURCE_DIR}/${USER_SYSGROUPS}" |tr ":" "\n" |tail -n +2) ; do
+			if grep -q "^${g}:" "${rootmnt}/etc/group" ; then
+				chroot "$rootmnt" adduser "$u_name" "$g" || return 5
+
+		# 6 finally, replace lines lines in passwd and shadow to override passwords an other settings
+		for f in ${USER_FILE} ${SHADOW_FILE} ; do
+			_replace_line_for "$u_name" "${rootmnt}/etc/${f}" "${SOURCE_DIR}/${f}" || return 6
+		done
+	done < "${SOURCE_DIR}/${USER_FILE}"
+	return 0
 }
 
 chboot_cp_root_files(){
