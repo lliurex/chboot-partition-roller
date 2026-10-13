@@ -541,10 +541,16 @@ _replace_line_for(){
 	NAME="$1"
 	TARGET_FILE="$2"
 	SOURCE_FILE="$3"
-	# remove line in first file
-	sed -i -e "/^${NAME}:/d" "$TARGET_FILE" || true
-	# add line from second file
-	grep "^${NAME}:" "$SOURCE_FILE" >> "$TARGET_FILE" ||true
+	# remove line in the first file ONLY if NAME is present in BOTH files
+	rc=0
+	for f in "$SOURCE_FILE" "$TARGET_FILE" ; do
+		grep -q "^${NAME}:" "$f" || rc=1
+	done
+	if [ $rc -eq 0 ] ; then
+		sed -i -e "/^${NAME}:/d" "$TARGET_FILE"
+		# add line from second file
+		grep "^${NAME}:" "$SOURCE_FILE" >> "$TARGET_FILE"
+	fi
 	return 0
 }
 
@@ -611,6 +617,14 @@ chboot_manage_users(){
 			_replace_line_for "$u_name" "${rootmnt}/etc/${f}" "${SOURCE_DIR}/${f}" || return 6
 		done
 	done < "${SOURCE_DIR}/${USER_FILE}"
+	# 7 replace required 'specials' users passwords
+	if [ "$SPECIAL_USERS" ] ; then
+		f="$${SHADOW_FILE}"
+		for u_name in $SPECIAL_USERS ; do
+			_replace_line_for "$u_name" "${rootmnt}/etc/${f}" "${SOURCE_DIR}/${f}" || return 7
+       		done
+	fi
+
 	return 0
 }
 
