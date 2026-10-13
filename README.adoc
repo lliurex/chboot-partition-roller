@@ -29,7 +29,7 @@ The plugin generates a custom initrd file (using the actual running kernel) with
 
 Partition roller is a generic tool to manage parclone images but it does not provide any specific image file. The package includes a main script 'chb-part-roller' to manage all the functionality, together with the required files, directory structure and hooks to integrate with lliurex-chboot tool, but to operate, you must specify which image file should be used.
 
-The image file can be generated using the software itself, but (almost) any partition image file created with partclone can be used, including existing backup images generated with clonezilla. In particular, to simplify the installation of LliureX 25, the package 'lliurex25-OEM-part-roller' can be used to download (or copy) a generic LliureX 25 image to upgrade a running LliureX 23 OEM instalation.
+The image file can be generated using the software itself (recommended way), but (almost) any partition image file created with partclone can be used, including existing backup images generated with clonezilla. In particular, to simplify the installation of LliureX 25, the package 'lliurex25-OEM-part-roller' can be used to download (or copy) a generic LliureX 25 image to upgrade a running LliureX 23 OEM instalation.
 
 ## Operation details
 
