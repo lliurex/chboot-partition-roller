@@ -521,6 +521,8 @@ chboot_cp_root_files(){
 		cd ${SOURCE_DIR}
 		cp -a ./ /${rootmnt}/ || rc=$?
 		cd "$CUR_DIR"
+	else
+		rc=0
 	fi
 	return $rc
 }
