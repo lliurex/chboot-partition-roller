@@ -42,15 +42,23 @@ Usage: chb-part-roller {mkinitrd|gengrub|saveusers|savefiles|installgrub} CHBOOT
 But the intended use of partition-roller is via chbootmgr tool:
 
 
-The first step is to write a configuration file in '/etc/chboot-part-roller/conf.d' directory (see next section 'Configuration').
+The first step is to write a configuration file in
+
+'/etc/chboot-part-roller/conf.d'
+
+directory (see next section 'Configuration').
 
 
-To use the configuration settings of file '/etc/chboot-part-roller/conf.d/{CFG_NAME}.cfg' you must run the following commands:
+To use the configuration settings of file
+
+'/etc/chboot-part-roller/conf.d/{CFG_NAME}.cfg'
+
+you must run the following commands:
 
 
 ### Install files
 
-This a required step also. To be able to use part-roller, you must run this command at least one time for each part-roller configuration file.
+This a required step also. To be able to use part-roller, you must run this command at least one time for each configuration file.
 
 After execution, the required directory structure under /chboot/liurex-chboot/srcs/{CFG_NAME} will be available.
 
@@ -58,7 +66,8 @@ After execution, the required directory structure under /chboot/liurex-chboot/sr
 chbootmgr install part-roller {CFG_NAME}
 ```
 
-Please note that this is the only 'chbootngr' instruction in which the “part-roller” parameter needs to be used. **In advance, only the {CFG_NAME} needs to be included in commands.**
+Please note that this is the only 'chbootmgr' instruction in which the “part-roller” parameter needs to be used.
+**In advance, only the {CFG_NAME} needs to be included in commands.**
 
 ### Prepare the {CFG_NAME} chboot entry
 
