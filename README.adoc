@@ -31,6 +31,16 @@ Partition roller is a generic tool to handle partclone images but it does not pr
 
 The image file can be generated using the software itself (recommended way), but (almost) any partition image file created with partclone can be used, including existing backup images generated with clonezilla, although you should avoid using different versions of partclone to save and restore the image. In particular, to simplify the installation of LliureX 25, the package 'lliurex25-OEM-part-roller' can be used to download (or copy) a generic LliureX 25 image to upgrade a running LliureX 23 OEM instalation.
 
+## Usage
+
+The main script 'chboot-partition-roller' can be used as follows:
+
+```
+Usage: chb-part-roller {mkinitrd|gengrub|saveusers|savefiles|installgrub} CHBOOT_BASE_DIR
+```
+
+
+
 ## Configuration
 
 Partition roller search for configuration files in directory /etc/chboot-part-roller/conf.d . At this stage, the files are actually fragments of shell scripts containing variables, which are sourced from the main script 'chb-part-roller', the file extension must be '.cfg'. A sample file 'part-roller-example.conf.DISABLED' is provided with the package.
@@ -53,6 +63,7 @@ PR_GRUB_ENTRYNAME   -> Title to show in grub chboot entry.
 
 PR_IMAGE_FILENAME   -> name of the 'target' image file (without path).
                        This is a mandatory setting, so no actions can be performed if empty.
+
 PR_IMG_DOWNLOAD_URL -> URL for downloading the image (optional)
 
 PR_DIRECT_URL_IMG   -> image file URL to restore partition from network (optional).
@@ -102,9 +113,12 @@ PR_SAVEUSERS_MODE   -> At this moment, the only allowed value is 'saved-users'.
                        the user and group information from the old system will not be retained
                        and the accounts from the image will not be modified.
 
-PR_USER_BLACKLIST   -> Blank separated list of local users to be excluded from save/restore
+PR_USERS_BLACKLIST  -> Blank separated list of local users to be excluded from save/restore
                        Default value is:
                        PR_USER_BLACKLIST="estudiant nobody guest-user"
+
+PR_GROUP_BLACKLIST  -> Blank separated list of local groups to be excluded from save/restore
+                       Default value is empty.
 
 PR_SYS_USERS_LIST   -> Special system users list. For this users, '/etc/shadow' data is saved
                        from original system and restored after image installation.
