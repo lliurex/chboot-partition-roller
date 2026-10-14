@@ -37,6 +37,16 @@ Partition roller search for configuration files in directory /etc/chboot-part-ro
 
 ### Configurable parameters by category:
 
+#### General
+
+```
+
+PR_GRUB_ENTRYNAME   -> Title to show in grub chboot entry.
+                       Default value is:
+                       PR_GRUB_ENTRYNAME="CHBOOT part-roller ({PR_IMAGE_FILENAME})"
+
+```
+
 #### Image file
 
 ```
@@ -55,15 +65,16 @@ PR_DIRECT_URL_IMG   -> image file URL to restore partition from network (optiona
 
 ```
 
-PR_SAVEFILES_LIST   -> list of files in destination directory to be 'saved' and restored after
-                       writting the image. It must contain the full path of a text file.
+PR_SAVEFILES_LIST   -> list of files in destination directory to be 'saved' and restored
+                       after writting the image. It must contain the full path of a file.
                        Each line of the file is the full path of a file to store from the
                        previous system before the installation of the new image.
                        Wildcard characters and regular expressions are not currently supported.
                        The default value for this parameter is
                        '/usr/share/chboot-partition-roller/saved-files.list'.
-                       The files '/etc/fstab' and LliureX tags from '/etc/lliurex-auto-upgrade/tags/'
-                       are also automatically appended (tags with dots in the name are ignored)
+                       The files '/etc/fstab' and LliureX tags from
+                       '/etc/lliurex-auto-upgrade/tags/' are also automatically appended to the
+                       list (tags with dots in the name are ignored).
                        Non existing files are silently ignored.
 
 ```
@@ -73,8 +84,8 @@ PR_SAVEFILES_LIST   -> list of files in destination directory to be 'saved' and 
 ```
 
 PR_SAVEUSERS_MODE   -> At this moment, the only allowed value is 'saved-users'.
-                       In this mode, local non system groups and user accounts are SAVED before
-                       writting the image.
+                       In this mode, local non system groups and user accounts are SAVED
+                       before writting the image.
                        The stored data include all the fields of the /etc/passwd and /etc/group
                        files (including current numeric values for UIDs and GIDs).
                        Encrypted passwords and account expiry information from /etc/shadow and
@@ -83,12 +94,22 @@ PR_SAVEUSERS_MODE   -> At this moment, the only allowed value is 'saved-users'.
                        from the image file are DELETED and replaced with local users and groups
                        saved from the old pre-existent system.
                        System users and groups are usually managed by installed packages, so
-                       they are not altered, they remain exactly as they appear in the image file.
-                       However, local users’ membership of system groups is restored from the
-                       previous system, but only for those system groups that exist in the new image.
-                       If the variable 'PR_SAVEUSERS_MODE' is not defined or has any other value,
+                       they are not altered, they remain exactly as they appear in the image
+                       file. However, local users’ membership of system groups is restored from
+                       the previous system, but only for those system groups that exist in the
+                       new image.
+                       If the variable 'PR_SAVEUSERS_MODE' is empty or has any other value,
                        the user and group information from the old system will not be retained
                        and the accounts from the image will not be modified.
+
+PR_USER_BLACKLIST   -> Blank separated list of local users to be excluded from save/restore
+                       Default value is:
+                       PR_USER_BLACKLIST="estudiant nobody guest-user"
+
+PR_SYS_USERS_LIST   -> Special system users list. For this users, '/etc/shadow' data is saved
+                       from original system and restored after image installation.
+                       Default value is:
+                       PR_SYS_USERS_LIST="root"
 
 ```
 
