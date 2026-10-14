@@ -44,6 +44,7 @@ Partition roller search for configuration files in directory /etc/chboot-part-ro
 PR_IMAGE_FILENAME   -> name of the 'target' image file (without path).
                        This is a mandatory setting, so no actions can be performed if empty.
 PR_IMG_DOWNLOAD_URL -> URL for downloading the image (optional)
+
 PR_DIRECT_URL_IMG   -> image file URL to restore partition from network (optional).
                        Leave it blank to disable direct network restore feature.
 
@@ -54,12 +55,14 @@ PR_DIRECT_URL_IMG   -> image file URL to restore partition from network (optiona
 
 ```
 
-PR_SAVEFILES_LIST   -> list of files in destination directory to be 'saved' and restored after writting the image. It must contain the full path of a text file.
-
-Each line of the file must contain the full path of a file in the target partition. Wildcard characters and regular expressions are not currently supported.
-The default value for this parameter is '/usr/share/chboot-partition-roller/saved-files.list'.
-The files '/etc/fstab' and (non automatic) LliureX tags from '/etc/lliurex-auto-upgrade/tags/' are also automatically appended.
-Non existing files are silently ignored.
+PR_SAVEFILES_LIST   -> list of files in destination directory to be 'saved' and restored after writting the image.
+                       It must contain the full path of a text file.
+                       Each line of the file must contain the full path of a file in the target partition.
+                       Wildcard characters and regular expressions are not currently supported.
+                       The default value for this parameter is '/usr/share/chboot-partition-roller/saved-files.list'.
+                       The files '/etc/fstab' and (non automatic) LliureX tags from '/etc/lliurex-auto-upgrade/tags/'
+                       are also automatically appended.
+                       Non existing files are silently ignored.
 
 ```
 
@@ -68,12 +71,19 @@ Non existing files are silently ignored.
 ```
 
 PR_SAVEUSERS_MODE   -> Currently, the only allowed value is 'saved-users'.
-
-In this mode, local non system groups and user accounts are SAVED before writting the image.
-The stored data include all the fields of the /etc/passwd and /etc/group files (including current numeric values for UIDs and GIDs). Encrypted passwords and account expiry information from /etc/shadow and /etc/gshadow is also stored.
-After restoring the image, ALL local non system groups and user accounts from the image file are DELETED and replaced with local users and groups saved from the old pre-existent system.
-System users and groups are usually managed by installed packages, so they are not altered, they remain exactly as they appear in the image file. However, local users’ membership of system groups is restored from the previous system, but only for those system groups that exist in the new image.
-If the variable 'PR_SAVEUSERS_MODE' is not defined or has any other value, the user and group information from the old system will not be retained and the accounts from the image will not be modified.
+                       In this mode, local non system groups and user accounts are SAVED before writting the image.
+                       The stored data include all the fields of the /etc/passwd and /etc/group files
+                       (including current numeric values for UIDs and GIDs). Encrypted passwords and account expiry
+                       information from /etc/shadow and /etc/gshadow is also stored.
+                       After restoring the image, ALL local non system groups and user accounts from the image file
+                       are DELETED and replaced with local users and groups saved from the old pre-existent system.
+                       System users and groups are usually managed by installed packages, so they are not altered,
+                       they remain exactly as they appear in the image file. However, local users’ membership
+                       of system groups is restored from the previous system, but only for those system groups
+                       that exist in the new image.
+                       If the variable 'PR_SAVEUSERS_MODE' is not defined or has any other value,
+                       the user and group information from the old system will not be retained
+                       and the accounts from the image will not be modified.
 
 ```
 
