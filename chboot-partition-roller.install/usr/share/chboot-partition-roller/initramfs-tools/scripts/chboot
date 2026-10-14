@@ -527,13 +527,13 @@ _get_local_ids(){
 _get_local_users(){
 	FILE="$rootmnt/etc/passwd"
 	[ -z "$1" ] || FILE="$1"    
-        get_local_ids $UID_MIN $UID_MAX $FILE
+        _get_local_ids $UID_MIN $UID_MAX $FILE
 }                       
                         
 _get_local_groups(){     
 	FILE="$rootmnt/etc/group"
 	[ -z "$1" ] || FILE="$1"    
-        get_local_ids $GID_MIN $GID_MAX $FILE
+        _get_local_ids $GID_MIN $GID_MAX $FILE
 }                               
 
 _get_field(){
