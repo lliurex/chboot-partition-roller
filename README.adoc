@@ -41,9 +41,11 @@ Partition roller search for configuration files in directory /etc/chboot-part-ro
 
 ```
 
-PR_IMAGE_FILENAME   -> name of the 'target' image file (without path). This is a mandatory setting, so no actions can be performed if empty.
+PR_IMAGE_FILENAME   -> name of the 'target' image file (without path).
+                       This is a mandatory setting, so no actions can be performed if empty.
 PR_IMG_DOWNLOAD_URL -> URL for downloading the image (optional)
-PR_DIRECT_URL_IMG   -> image file URL to restore partition from network (optional). Leave it blank to disable direct network restore feature.
+PR_DIRECT_URL_IMG   -> image file URL to restore partition from network (optional).
+                       Leave it blank to disable direct network restore feature.
 
 ```
 
