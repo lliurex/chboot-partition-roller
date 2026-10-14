@@ -441,6 +441,7 @@ chboot_mount_root(){
 	fi
 
 	chboot_cp_root_files || panic "Error copying files to root filesystem"
+	chboot_bind_mounts || panic "Unable to do bind mounts"
 	chboot_install_grub "$CHB_GRUB" || panic "Error installing grub"
 	urc=0
 	chboot_manage_users || urc=$?
@@ -448,6 +449,7 @@ chboot_mount_root(){
 		echo "Exit status: $urc"
 		panic "Error updating user and group information"
 	fi
+	chboot_umount_all || true
 	sync
 	REBOOT_DELAY=10
 	echo "All done!"
@@ -649,8 +651,7 @@ chboot_cp_root_files(){
 	return $rc
 }
 
-chboot_install_grub(){
-	DEST_DISK="$1"
+chboot_bind_mounts(){
 	EFIVARS_DIR="/sys/firmware/efi/efivars"
 	# test if efivarfs is already mounted
 	_not_empty_dir "${EFIVARS_DIR}" || mount -t efivarfs none $EFIVARS_DIR || return 1
@@ -658,16 +659,25 @@ chboot_install_grub(){
 	rc=0
 	# do bind mounts
 	for d in /dev /dev/pts /proc /sys /run /boot/efi $EFIVARS_DIR ; do mount --bind $d ${rootmnt}${d} || rc=2; done
+	return $rc
+}
+
+chboot_umount_all(){
+	# umount bind  and root dir
+	EFIVARS_DIR="/sys/firmware/efi/efivars"
+	if [ $rc -eq 0 ] ; then
+		for d in $EFIVARS_DIR /boot/efi /run /sys /proc /dev/pts /dev ; do umount ${rootmnt}${d}; done  
+		umount ${rootmnt}
+	fi
+}
+
+chboot_install_grub(){
+	DEST_DISK="$1"
 
 	# install and update grub in chroot
 	[ $rc -ne 0 ] || chroot "${rootmnt}" grub-install $DEST_DISK || rc=3
 	[ $rc -ne 0 ] || chroot "${rootmnt}" update-grub || rc=4
 
-	# umount bind  and root dir
-	if [ $rc -eq 0 ] ; then
-		for d in $EFIVARS_DIR /boot/efi /run /sys /proc /dev/pts /dev ; do umount ${rootmnt}${d}; done  
-		umount ${rootmnt}
-	fi
 	return $rc
 }
 
