@@ -39,6 +39,58 @@ The main script 'chboot-partition-roller' can be used as follows:
 Usage: chb-part-roller {mkinitrd|gengrub|saveusers|savefiles|installgrub} CHBOOT_BASE_DIR
 ```
 
+But the intended use of partition-roller is via chbootmgr tool:
+
+
+The first step is to write a configuration file in '/etc/chboot-part-roller/conf.d' directory (see next section 'Configuration').
+
+
+To use the configuration settings of file '/etc/chboot-part-roller/conf.d/{CFG_NAME}.cfg' you must run the following commands:
+
+
+### Install files
+
+This a required step also. To be able to use part-roller, you must run this command at least one time for each part-roller configuration file.
+
+After execution, the required directory structure under /chboot/liurex-chboot/srcs/{CFG_NAME} will be available.
+
+```
+chbootmgr install part-roller {CFG_NAME}
+```
+
+Please note that this is the only 'chbootngr' instruction in which the “part-roller” parameter needs to be used. **In advance, only the {CFG_NAME} needs to be included in commands.**
+
+### Prepare the {CFG_NAME} chboot entry
+
+By default, all the required data to generate the chboot {CFG_NAME} entry is read from configuration file, but you can include some optional parameters to change this behaviour.
+
+The optional parameters are used to configure entry but are not saved in the configuration file
+
+```
+chbootmgr prepare {CFG_NAME} [optional parameters ...]
+
+Optional parameters available:
+
+  Operation mode options
+
+--save-to-file      [NAME]: force chboot operation mode to 'save-to-file'
+                            an optional alternative image filename can be specified
+--restore-from-file [NAME]: force chboot operation mode to 'restore-from-file'
+                            an optional alternative image filename can be specified
+--restore-from-url  [URL] : force chboot operation mode to 'restore-from-url'
+                            an optional alternative url for image name can be specified
+
+  Alternative image options
+
+--override-image : Ignore existing image file and download or copy again the file.
+--copy-image {IMG FILE PATH} : provides an existing file path to copy the image file
+--download-image {IMG URL} : provides an alternative URL to download the image file from
+(Note: the previous commands can be used as an alternative source for the image file, but 
+       the image filename under /chboot/lliurex-chboot/imgs is not changed)
+
+```
+
+This command creates the required directory structure under /chboot/liurex-chboot/srcs/{CFG_FILENAME}
 
 
 ## Configuration
@@ -51,9 +103,13 @@ Partition roller search for configuration files in directory /etc/chboot-part-ro
 
 ```
 
+PR_CHBOOT_MODE      -> Set chboot operation mode to RESTORE from file or URL or to SAVE to file
+                       Valid options are 'restore-from-file', 'restore-from-url' and 'save-to-file'
+                       Default value is 'restore-from-file'
+
 PR_GRUB_ENTRYNAME   -> Title to show in grub chboot entry.
                        Default value is:
-                       PR_GRUB_ENTRYNAME="CHBOOT part-roller (${PR_IMAGE_FILENAME})"
+                       PR_GRUB_ENTRYNAME="CHBOOT part-roller ${PR_CHBOOT_MODE} (${PR_IMAGE_FILENAME})"
 
 ```
 
