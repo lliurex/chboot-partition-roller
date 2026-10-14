@@ -613,7 +613,7 @@ chboot_manage_users(){
 	# Use useradd to ensure home dir creation and copy of /etc/skel files
 	while IFS=":" read u_name dummy1 u_id u_gid u_gecos u_home u_shell ; do
 		# 4 include minimal set of parameters to create home and avoid new UID or GID creation
-		chroot "$rootmnt" useradd -D -m -N -s -u "$u_id" -d "$u_home" -g "$u_gid" "$u_name" || return 4
+		chroot "$rootmnt" useradd -D -m -N -u "$u_id" -d "$u_home" -g "$u_gid" "$u_name" || return 4
 		# 5 iterate over system groups for the user, verify the group exists and then, add user to that group
 		for g in $(grep "^${u_name}:" "${SOURCE_DIR}/${USER_SYSGROUPS}" |tr ":" "\n" |tail -n +2) ; do
 			if grep -q "^${g}:" "${rootmnt}/etc/group" ; then
