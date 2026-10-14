@@ -442,7 +442,12 @@ chboot_mount_root(){
 
 	chboot_cp_root_files || panic "Error copying files to root filesystem"
 	chboot_install_grub "$CHB_GRUB" || panic "Error installing grub"
-	chboot_manage_users || panic "Error updating user and group information"
+	urc=0
+	chboot_manage_users || urc=$?
+	if [ $rc -ne 0 ] ; then
+		echo "Exit status: $urc"
+		panic "Error updating user and group information"
+	fi
 	sync
 	REBOOT_DELAY=10
 	echo "All done!"
