@@ -35,7 +35,7 @@ The image file can be generated using the software itself (recommended way), but
 
 Partition roller search for configuration files in directory /etc/chboot-part-roller/conf.d . At this stage, the files are actually fragments of shell scripts containing variables, which are sourced from the main script 'chb-part-roller', the file extension must be '.cfg'. A sample file 'part-roller-example.conf.DISABLED' is provided with the package.
 
-###Configurable parameters by category:
+### Configurable parameters by category:
 
 #### Image file
 
@@ -65,7 +65,7 @@ Non existing files are silently ignored.
 
 ```
 
-PR_SAVEUSERS_MODE   -> **Currently, the only allowed value is 'saved-users'.**
+PR_SAVEUSERS_MODE   -> Currently, the only allowed value is 'saved-users'.
 
 In this mode, local non system groups and user accounts are SAVED before writting the image.
 The stored data include all the fields of the /etc/passwd and /etc/group files (including current numeric values for UIDs and GIDs). Encrypted passwords and account expiry information from /etc/shadow and /etc/gshadow is also stored.
