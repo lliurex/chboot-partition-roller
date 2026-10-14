@@ -611,7 +611,8 @@ chboot_manage_users(){
 		for g in $(grep "^${u_name}:" "${SOURCE_DIR}/${USER_SYSGROUPS}" |tr ":" "\n" |tail -n +2) ; do
 			if grep -q "^${g}:" "${rootmnt}/etc/group" ; then
 				chroot "$rootmnt" adduser "$u_name" "$g" || return 5
-
+			fi
+		done
 		# 6 finally, replace lines lines in passwd and shadow to override passwords an other settings
 		for f in ${USER_FILE} ${SHADOW_FILE} ; do
 			_replace_line_for "$u_name" "${rootmnt}/etc/${f}" "${SOURCE_DIR}/${f}" || return 6
