@@ -287,7 +287,7 @@ save_users(){
 			if [ "$EXTRA_SYSTEM_GROUPS" ] ; then
 				# 'repack' the user system groups list in a single line using colon (':') as separator, remove ending colon and insert username at the beginning of the line
 				# then, write user line to 'USER_SYSGROUPS' file
-				echo "${EXTRA_SYSTEM_GROUPS}" |tr "\n" ":" |sed -e "s%:$%%;s%^%${u}:%" >> "${DEST_DIR}/${USER_SYSGROUPS}"
+				echo "${EXTRA_SYSTEM_GROUPS}" |tr "\n" ":" |sed -e "s%:$%\n%;s%^%${u}:%" >> "${DEST_DIR}/${USER_SYSGROUPS}"
 			fi
 		fi
 	done
