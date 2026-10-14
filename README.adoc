@@ -35,10 +35,27 @@ The image file can be generated using the software itself (recommended way), but
 
 Partition roller search for configuration files in directory /etc/chboot-part-roller/conf.d . At this stage, the files are actually fragments of shell scripts containing variables, which are sourced from the main script 'chb-part-roller', the file extension must be '.cfg'. A sample file 'part-roller-example.conf.DISABLED' is provided with the package.
 
-Configurable parameters are:
+Configurable parameters by category:
+
+### Image file
 ```
-PR_IMAGE_FILENAME -> name of the 'target' image file (without path)
-PR_DOWNLOAD_URL   -> URL for downloading the image
-PR_DIRECT_URL_IMG -> image file URL to restore partition from network
+PR_IMAGE_FILENAME   -> name of the 'target' image file (without path). This is a mandatory setting, so no actions can be performed if empty.
+PR_IMG_DOWNLOAD_URL -> URL for downloading the image (optional)
+PR_DIRECT_URL_IMG   -> image file URL to restore partition from network (optional). Leave it blank to disable direct network restore feature.
+```
+### Saved files
+PR_SAVEFILES_LIST   -> list of files in destination directory to be 'preserved' and restored after writting the image. It must contain the full path of a text file.
+		       Each line imust contain the full path of a file in the target partition. Wildcard characters and regular expressions are not currently supported.
+  		       The default value for this parameter is '/usr/share/chboot-partition-roller/saved-files.list'.
+		       The files '/etc/fstab' and non automatic LliureX tags in '/etc/lliurex-auto-upgrade/tags/' are also automatically appended.
+		       Non existing files are silently ignored.
+```
+### Saved users
+```
+PR_SAVEUSERS_MODE   -> Currently, the only allowed value is 'saved-users'. In this mode, local non system groups and user accounts are PRESERVED before writting the
+                       image. The preserved data include all the fields of the /etc/passwd and /etc/group files (including current numeric values for UIDs and GIDs).
+		       Encrypted passwords and account expiry information from /etc/shadow and /etc/gshadow is also stored.
+ALL local non system groups and user accounts from the image file are DELETED
+                       after restoration 
 ```
 
