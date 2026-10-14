@@ -276,7 +276,7 @@ save_users(){
 
 	# save local user data
 	for UDATA in $(get_local_users) ; do
-	        u="$(_get_field "$UDATA" 1)"
+	        u="$(get_field "$UDATA" 1)"
 		if ! echo " $USERS_BLACK_LIST " | grep -q " $u " ; then
 			for f in $USER_FILE $SHADOW_FILE ; do
 				grep "^${u}:" $SYS_DIR/$f >> $DEST_DIR/$f
@@ -294,7 +294,7 @@ save_users(){
 
 	# save local group data (including user membership and gshadow)
 	for GDATA in $(get_local_groups) ; do
-	        g="$(_get_field "$GDATA" 1)"
+	        g="$(get_field "$GDATA" 1)"
 		if ! echo " $GROUPS_BLACK_LIST " | grep -q " $g " ; then
 			for f in $GROUP_FILE $GSHADOW_FILE ; do
 				grep "^${g}:" $SYS_DIR/$f >> $DEST_DIR/$f
