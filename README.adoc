@@ -48,6 +48,10 @@ PR_DIRECT_URL_IMG   -> image file URL to restore partition from network (optiona
 ```
 
 #### Saved files
+
+
+```
+
 PR_SAVEFILES_LIST   -> list of files in destination directory to be 'saved' and restored after writting the image. It must contain the full path of a text file.
 
 		       Each line of the file must contain the full path of a file in the target partition. Wildcard characters and regular expressions are not
