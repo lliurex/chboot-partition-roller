@@ -44,9 +44,7 @@ But the intended use of partition-roller is via chbootmgr tool:
 
 The first step is to write a configuration file in
 
-'/etc/chboot-part-roller/conf.d'
-
-directory (see next section 'Configuration').
+'/etc/chboot-part-roller/conf.d' directory (see next section 'Configuration').
 
 
 To use the configuration settings of file
@@ -67,6 +65,7 @@ chbootmgr install part-roller {CFG_NAME}
 ```
 
 Please note that this is the only 'chbootmgr' instruction in which the “part-roller” parameter needs to be used.
+
 **In advance, only the {CFG_NAME} needs to be included in commands.**
 
 ### Prepare the {CFG_NAME} chboot entry
