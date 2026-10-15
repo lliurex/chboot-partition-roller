@@ -57,7 +57,7 @@ you must run the following commands:
 
 This is a mandatory action to be able to use part-roller.
 
-You must run this command at least one time for each configuration file in order to create the required directory structure under /chboot/liurex-chboot/srcs/{CFG_NAME}
+You must run this command at least one time for each configuration file in order to create the required directory structure under /chboot/liurex-chboot/srcs/{CFG_NAME} :
 
 ```
 chbootmgr install part-roller {CFG_NAME}
