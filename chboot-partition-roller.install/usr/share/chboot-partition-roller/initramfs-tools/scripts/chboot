@@ -638,9 +638,17 @@ chboot_manage_users(){
 
 chboot_cp_root_files(){
 	rc=0
+	# remove existing lliurex tags (if any)
+	TAGS_DIR="${rootmnt}/etc/lliurex-auto-upgrade/tags"
+	if _not_empty_dir "$TAGS_DIR" ; then
+		rm -rf "$TAGS_DIR"
+		mkdir -p "$TAGS_DIR"
+	fi
 	SOURCE_DIR="${chbmnt}/${CHB_DIR}/${CHB_DATA_DIR}/saved-files"
 	if _not_empty_dir "${SOURCE_DIR}" ; then
 		# TODO: find a better way to do this ...
+		# TODO: for each file, check existence of user and group and decide what to do ....
+
 		CUR_DIR="$(pwd)"
 		cd ${SOURCE_DIR}
 		cp -a ./ /${rootmnt}/ || rc=$?
