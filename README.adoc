@@ -33,25 +33,22 @@ Partition roller is a generic tool to handle partclone images but it does not pr
 
 The image file can be generated using the software itself (recommended way), but (almost) any partition image file created with partclone can be used, including existing backup images generated with clonezilla, although you should avoid using different versions of partclone to save and restore the image. In particular, to simplify the installation of LliureX 25, the package 'lliurex25-OEM-part-roller' can be used to download (or copy) a generic LliureX 25 image to upgrade isystems from LliureX 23 OEM instalation.
 
-## Usage
+## Operation
 
-The main script 'chboot-partition-roller' can be used as follows:
+The main script 'chb-part-roller' can be used as follows:
 
 ```
 Usage: chb-part-roller {mkinitrd|gengrub|saveusers|savefiles|installgrub} CHBOOT_BASE_DIR
 ```
 
-But the intended use of partition-roller is via chbootmgr tool:
+But the intended use of partition roller is via chbootmgr tool, so in most cases, it will not be necessary to run this script directly.
+
+To use part-roller with chboot, the first step is to write a configuration file with '.cfg' extension (see next section 'Configuration') in directory:
+
+'/etc/chboot-part-roller/conf.d'
 
 
-The first step is to write a configuration file in
-
-'/etc/chboot-part-roller/conf.d' directory (see next section 'Configuration').
-
-
-To use the configuration settings of file
-
-'/etc/chboot-part-roller/conf.d/{CFG_NAME}.cfg'
+Once you have the file, let’s say '/etc/chboot-part-roller/conf.d/**{CFG_NAME}**.cfg'
 
 you must run the following commands:
 
