@@ -32,9 +32,19 @@ GID_MAX="$(get_defs 'GID_MAX')"
 GROUPS_BLACK_LIST=""
 
 LOCAL_USERS_MODE="saved-users"
+CFG_DIR="/etc/chboot-part-roller/conf.d"
+CHBOOT_MODE="restore-from-file"
+CHBOOT_TITLE=
+CHBOOT_IMG_NAME=
+CHBOOT_URL=
+
+PR_GRUB_ENTRYNAME=
+PR_IMG_DOWNLOAD_URL=
 
 INITRAMFS_DIR="/usr/share/chboot-partition-roller/initramfs-tools"
 FILE_LIST_FILE="/usr/share/chboot-partition-roller/saved-files.list"
+FORCE_FILES="/usr/share/chboot-partition-roller/force-files.list"
+
 
 die(){
 	echo "$1" >&2
@@ -50,6 +60,44 @@ error_msg(){
 
 usage(){
 	die "Usage: $(basename "$0") {mkinitrd|gengrub|saveusers|savefiles|installgrub} CHBOOT_BASE_DIR"
+}
+
+load_config(){
+	CFG_NAME="$1"
+	CFG_FILE="${CFG_DIR}/${CFG_NAME}.cfg"
+	[ -r "$CFG_FILE" ] || error_msg "Invalid configuration mane $CFG_NAME"
+	# reset values and source file
+	PR_CHBOOT_MODE="restore-from-file"
+	PR_IMAGE_FILENAME=
+	PR_DIRECT_URL_IMG=
+	PR_SAVEUSERS_MODE=
+	PR_USERS_BLACKLIST=
+        PR_USER_BLACKLIST=
+	PR_GROUP_BLACKLIST=
+	PR_SYS_USERS_LIST=
+	. $CFG_FILE
+
+	# checks
+	ERR_TITLE="Invalid configuration file $CFG_NAME"
+	[ "$PR_IMAGE_FILENAME" ] || error_msg "empty <PR_IMAGE_FILENAME>" "$ERR_TITLE"
+	CHBOOT_IMG_NAME="$PR_IMAGE_FILENAME"
+
+	# use current values
+	[ -z "$PR_CHBOOT_MODE" ] || CHBOOT_MODE="$PR_CHBOOT_MODE"
+	if [ "$PR_CHBOOT_MODE" = "restore-from-url" ] ; then
+		[ "$PR_DIRECT_URL_IMG" ] error_msg "<PR_DIRECT_URL_IMG> is required for mode '$PR_CHBOOT_MODE'" "$ERR_TITLE"
+		CHBOOT_URL="$PR_DIRECT_URL_IMG"
+	fi
+
+
+	CHBOOT_TITLE="CHBOOT ${CFG_NAME} ${CHBOOT_MODE} (${CHBOOT_IMG_NAME})"
+	[ -z "$PR_GRUB_ENTRYNAME" ]  || CHBOOT_TITLE="$PR_GRUB_ENTRYNAME"
+	[ -z "$PR_SAVEFILES_LIST" ]  || FILE_LIST_FILE="$PR_SAVEFILES_LIST"
+	[ -z "$PR_SAVEUSERS_MODE" ]  || LOCAL_USERS_MODE="$PR_SAVEUSERS_MODE"
+
+	[ -z "$PR_USERS_BLACKLIST" ] || USERS_BLACK_LIST="$PR_USERS_BLACKLIST"
+	[ -z "$PR_GROUP_BLACKLIST" ] || GROUPS_BLACK_LIST="$PR_GROUP_BLACKLIST"
+	[ -z "$PR_SYS_USERS_LIST" ]  || SPECIAL_USERS="$PR_SYS_USERS_LIST"
 }
 
 get_disk_id(){
@@ -196,7 +244,10 @@ save_files(){
 	rm -fr "$DEST_DIR"
 
 	mkdir -p "$DEST_DIR"
-	rsync -a --files-from=$FILE_LIST / "$DEST_DIR" || error_msg "Unable to preserve files"
+	#TODO: ... prepare chboot-orphan-files ...
+	for f in $FILE_LIST $FORCE_FILES ; do
+		rsync -a --files-from=$f / "$DEST_DIR" || error_msg "Unable to preserve files"
+	done
 
 	# echo "Preserve tags ..."
 	TAGS_DIR_LIST="/etc/lliurex-auto-upgrade/tags"
