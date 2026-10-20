@@ -131,7 +131,7 @@ PR_CHBOOT_MODE      -> Set chboot operation mode to RESTORE from file or URL or 
 
 PR_GRUB_ENTRYNAME   -> Title to show in grub chboot entry.
                        Default value is:
-                       PR_GRUB_ENTRYNAME="CHBOOT part-roller ${PR_CHBOOT_MODE} (${PR_IMAGE_FILENAME})"
+                       PR_GRUB_ENTRYNAME="CHBOOT ${CFG_NAME} ${PR_CHBOOT_MODE} (${PR_IMAGE_FILENAME})"
 
 ```
 
@@ -140,7 +140,7 @@ PR_GRUB_ENTRYNAME   -> Title to show in grub chboot entry.
 ```
 
 PR_IMAGE_FILENAME   -> name of the 'target' image file (without path).
-                       This is a mandatory setting, so no actions can be performed if empty.
+                       **This is a mandatory setting, so no actions can be performed if empty.**
 
 PR_IMG_DOWNLOAD_URL -> URL for downloading the image (optional)
 
