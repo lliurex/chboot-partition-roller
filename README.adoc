@@ -38,7 +38,7 @@ The image file can be generated using the software itself (recommended way), but
 The main script 'chb-part-roller' can be used as follows:
 
 ```
-Usage: chb-part-roller {mkinitrd|gengrub|saveusers|savefiles|installgrub} CHBOOT_BASE_DIR
+Usage: chb-part-roller {mkinitrd|gengrub|saveusers|savefiles|installgrub} CFG_NAME
 ```
 
 But the intended use of partition roller is via chbootmgr tool, so in most cases, it will not be necessary to run this script directly.
