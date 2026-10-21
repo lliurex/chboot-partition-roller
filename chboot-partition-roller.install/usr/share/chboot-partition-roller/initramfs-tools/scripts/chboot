@@ -90,8 +90,8 @@ local_block()
 chboot_premount()
 {
 	if [ "${chboot_premount_used}" != "yes" ]; then
-		[ "${quiet?}" != "y" ] && log_begin_msg "Running /scripts/chboot-premount"
-		run_scripts /scripts/chboot-premount
+		[ "${quiet?}" != "y" ] && log_begin_msg "Running /scripts/partroller-premount"
+		run_scripts /scripts/partroller-premount
 		[ "$quiet" != "y" ] && log_end_msg
 	fi
 	for d in $chbmnt $efimnt ; do
