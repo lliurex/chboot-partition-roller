@@ -197,6 +197,33 @@ chboot_entry(){
 
 	cat <<EOF
 set timeout=10
+#search --no-floppy --fs-uuid --set=root ${CHBOOT_UUID}
+
+menuentry 'CHBOOT: ${CHBOOT_TITLE} (${KERNEL_VERSION})' --class lliurex --class gnu-linux --class gnu --class os \$menuentry_id_option 'gnulinux-${KERNEL_VERSION}-advanced-${ROOT_UUID}' {
+        # recordfail
+        # load_video
+        # gfxmode \$linux_gfx_mode
+        insmod gzio
+        if [ x\$grub_platform = xxen ]; then insmod xzio; insmod lzopio; fi
+        insmod part_gpt
+        insmod ext2
+        search --no-floppy --fs-uuid --set=root ${CHBOOT_UUID}
+        echo    'Loading Linux ${KERNEL_VERSION} for CHBOOT part-roller ${CFG_NAME} ...'
+        linux   \$chboot/${BOOT_PATH}/vmlinuz-${KERNEL_VERSION} root=PARTUUID=${ROOT_PARTUUID} ro boot=partroller chb.ncurses chb.uuid=${ROOT_UUID} chb.efi=UUID=${EFI_UUID} chb.dev=UUID=${CHBOOT_UUID} chb.dir=${CHBOOT_PATH} chb.imgdir=${CHBOOT_IMG_PATH} $CHBOOT_IMG_OPTION $CHBOOT_URL_OPTION net.ifnames=0 rw $vt_handoff
+        echo    'Loading initial ramdisk ...'
+        initrd  \$chboot/${BOOT_PATH}/${CHBOOT_INITRD}
+}
+EOF
+
+}
+
+chboot_old_entry(){
+	#pkgdatadir=/usr/lib/grub
+        #GRUB_THEME=""
+        #. /etc/grub.d/00_header
+
+	cat <<EOF
+set timeout=10
 search --no-floppy --fs-uuid --set=root ${CHBOOT_UUID}
 
 menuentry 'CHBOOT: ${CHBOOT_TITLE} (${KERNEL_VERSION})' --class lliurex --class gnu-linux --class gnu --class os \$menuentry_id_option 'gnulinux-${KERNEL_VERSION}-advanced-${ROOT_UUID}' {
