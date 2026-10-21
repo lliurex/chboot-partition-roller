@@ -38,6 +38,8 @@ CHBOOT_TITLE=
 CHBOOT_IMG_NAME=
 CHBOOT_URL=
 
+CHBOOT_INITRD_PREFIX="initrd_partroller.img"
+
 PR_GRUB_ENTRYNAME=
 PR_IMG_DOWNLOAD_URL=
 
@@ -136,8 +138,8 @@ gen_grub_cfg(){
 
 	#echo "Find initrd chboot ..."
 
-	CHBOOT_INITRD="$(ls -1 "$BOOT_DIR" | grep "^initrd_chboot.img" |tail -1)"
-	[ "$CHBOOT_INITRD" ] || error_msg "chboot initrd file not found"
+	CHBOOT_INITRD="$(ls -1 "$BOOT_DIR" | grep "^${CHBOOT_INITRD_PREFIX}" |tail -1)"
+	[ "$CHBOOT_INITRD" ] || error_msg "partroller initrd file not found"
 
 	KERNEL_VERSION="${CHBOOT_INITRD#*-}"
 
@@ -234,7 +236,7 @@ install_boot_files(){
 	#echo "Create initrd and copy kernel to chboot boot dir ..."
 	rc=0
 	mkdir -p "$BOOT_DIR"
-	mkinitramfs -d "$INITRAMFS_DIR"  -o $BOOT_DIR/initrd_chboot.img-$(uname -r) || rc=$?
+	mkinitramfs -d "$INITRAMFS_DIR"  -o $BOOT_DIR/${CHBOOT_INITRD_PREFIX}-$(uname -r) || rc=$?
 	[ $rc -ne 0 ] || cp /boot/vmlinuz-$(uname -r) $BOOT_DIR/ || ec=$?
 	return $rc
 }
