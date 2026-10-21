@@ -207,7 +207,7 @@ menuentry 'CHBOOT: ${CHBOOT_TITLE} (${KERNEL_VERSION})' --class lliurex --class 
         insmod ext2
         search --no-floppy --fs-uuid --set=root ${CHBOOT_UUID}
         echo    'Loading Linux ${KERNEL_VERSION} for CHBOOT RESTORE ...'
-        linux   ${BOOT_PATH}/vmlinuz-${KERNEL_VERSION} root=PARTUUID=${ROOT_PARTUUID} ro boot=chboot chb.ncurses chb.uuid=${ROOT_UUID} chb.efi=UUID=${EFI_UUID} chb.dev=UUID=${CHBOOT_UUID} chb.dir=${CHBOOT_PATH} chb.imgdir=${CHBOOT_IMG_PATH} $CHBOOT_IMG_OPTION $CHBOOT_URL_OPTION net.ifnames=0 rw $vt_handoff
+        linux   ${BOOT_PATH}/vmlinuz-${KERNEL_VERSION} root=PARTUUID=${ROOT_PARTUUID} ro boot=partroller chb.ncurses chb.uuid=${ROOT_UUID} chb.efi=UUID=${EFI_UUID} chb.dev=UUID=${CHBOOT_UUID} chb.dir=${CHBOOT_PATH} chb.imgdir=${CHBOOT_IMG_PATH} $CHBOOT_IMG_OPTION $CHBOOT_URL_OPTION net.ifnames=0 rw $vt_handoff
         echo    'Loading initial ramdisk ...'
         initrd  ${BOOT_PATH}/${CHBOOT_INITRD}
 }
