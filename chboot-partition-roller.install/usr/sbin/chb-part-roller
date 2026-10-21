@@ -59,7 +59,7 @@ error_msg(){
 }
 
 usage(){
-	die "Usage: $(basename "$0") {mkinitrd|gengrub|saveusers|savefiles|installgrub} CHBOOT_BASE_DIR"
+	die "Usage: $(basename "$0") {mkinitrd|gengrub|saveusers|savefiles|installgrub} CFG_NAME"
 }
 
 load_config(){
@@ -211,13 +211,20 @@ menuentry 'CHBOOT: ${CHBOOT_TITLE} (${KERNEL_VERSION})' --class lliurex --class 
         echo    'Loading initial ramdisk ...'
         initrd  ${BOOT_PATH}/${CHBOOT_INITRD}
 }
+EOF
+	chboot_safe_entry "${ROOT_UUID}"
+}
 
+chboot_safe_entry(){
+	ROOT_UIID="$1"
+	cat <<EOF
 search --no-floppy --fs-uuid --set=oldroot ${ROOT_UUID}
 if [ -e (\$oldroot)/boot/grub/grub.cfg ] ; then
 	menuentry 'Run old grub configuration to start LliureX' {
 		configfile (\$oldroot)/boot/grub/grub.cfg 
 	}
 fi
+
 
 EOF
 }
@@ -392,9 +399,17 @@ install_grub(){
 [ "$1" ] || usage
 ACTION="$1"
 
+
 [ "$2" ] || usage
-CHBOOT_BASE_DIR="$2"
+CFG_NAME="$2"
+CHBOOT_BASE_DIR="/chboot/lliurex-chboot/srcs/$2"
 # i.e. /chboot/lliurex-chboot/srcs/part-roller
+#
+# tests
+
+load_config "$CFG_NAME"
+[ -d "$CHBOOT_BASE_DIR" ] || error_msg "chboot directory $CHBOOT_BASE_DIR not found"
+
 
 case "$ACTION" in
 	mkinitrd)
@@ -411,6 +426,9 @@ case "$ACTION" in
 		;;
 	savefiles)
 		save_files "$FILE_LIST_FILE" "$CHBOOT_BASE_DIR/data"
+		;;
+	*)
+		usage
 		;;
 esac
 
