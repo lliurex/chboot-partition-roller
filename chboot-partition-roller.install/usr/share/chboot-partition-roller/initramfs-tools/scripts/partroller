@@ -720,6 +720,7 @@ chboot_install_grub(){
 	DEST_DISK="$1"
 
 	# install and update grub in chroot
+	# TODO: check for existence of lliurex-grub-install ...
 	[ $rc -ne 0 ] || chroot "${rootmnt}" grub-install $DEST_DISK || rc=3
 	[ $rc -ne 0 ] || chroot "${rootmnt}" update-grub || rc=4
 
