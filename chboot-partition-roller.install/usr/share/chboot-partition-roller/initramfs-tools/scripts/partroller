@@ -693,6 +693,11 @@ chboot_bind_mounts(){
 	rc=0
 	# do bind mounts
 	for d in /dev /dev/pts /proc /sys /run /boot/efi $EFIVARS_DIR ; do mount --bind $d ${rootmnt}${d} || rc=2; done
+
+	D="/chboot"
+	if [ -d "${rootmnt}${D}" ] ; then
+		mount --bind  "${chbmnt}" "${rootmnt}${D}" || return 2
+	fi
 	return $rc
 }
 
@@ -701,6 +706,12 @@ chboot_umount_all(){
 	EFIVARS_DIR="/sys/firmware/efi/efivars"
 	if [ $rc -eq 0 ] ; then
 		for d in $EFIVARS_DIR /boot/efi /run /sys /proc /dev/pts /dev ; do umount ${rootmnt}${d}; done  
+
+		D="/chboot"
+		if [ -d "${rootmnt}${D}" ] ; then
+			umount "${rootmnt}${D}"
+		fi
+
 		umount ${rootmnt}
 	fi
 }
