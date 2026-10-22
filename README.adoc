@@ -56,17 +56,17 @@ This feature depends of the configuration variable 'PR_SAVEUSERS_MODE' (but, at 
 
 In this mode, part-roller creates a directory 'data/saved-users' with:
 
- - user and group fields from '/etc/passwd' and '/etc/group' files
+- user and group fields from '/etc/passwd' and '/etc/group' files
 
- - password and expiration data from '/etc/shadow' and '/etc/gshadow' files
+- password and expiration data from '/etc/shadow' and '/etc/gshadow' files
 
- - system and non-system groups ownership for non-system local users
+- system and non-system groups ownership for non-system local users
 
 After the image is restored, part-roller perfoms the following actions:
 
- - remove **ALL** local non-system users and groups
+- remove **ALL** local non-system users and groups
 
- - use the 'saved-users' data to.
+- use the 'saved-users' data to.
 
     - create local grups with the original GIDs and gshadow info
 
