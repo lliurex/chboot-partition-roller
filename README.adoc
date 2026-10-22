@@ -29,9 +29,29 @@ The intended use is to simplify and automate the upgrade between major versions 
 
 The software generates a custom initrd file (using the actual running kernel) including the partclone binary, disk and compression tools, and required init scripts. All the necessary tools to restore (or create) a system image are installed in the ramdisk, so no root partition filesystem is needed for the boot process, but disk storage is needed to store the image file (and some additional data). As alternative, in a LAN environment, the image can can be accessed from an HTTP server and written directly to the target partition without the need of intermediate storage.
 
-Partition roller is a generic tool to handle partclone images but it does not provide any specific image file by itself. The package includes a main script 'chb-part-roller' for the "low-leve" operation but provides also the required hooks to integrate with lliurex-chboot tool. A configuration file must be provided to specify the image file to be used, along with other options to be able to operate part-roller in chboot context. Some examples of configurations for different scenarios are included in the package.
+Partition roller is a generic tool to handle partclone images but it does not provide any specific image file by itself. The package includes a main script 'chb-part-roller' for the "low-level" operation but provides also the required hooks to integrate with lliurex-chboot tool. A configuration file must be provided to specify the image file to be used, along with other options to be able to operate part-roller in chboot context. Some examples of configurations for different scenarios are included in the package.
 
 The image file can be generated using the software itself (recommended way), but (almost) any partition image file created with partclone can be used, including existing backup images generated with clonezilla, although you should avoid using different versions of partclone to save and restore the image. In particular, to simplify the installation of LliureX 25, the package 'lliurex25-OEM-part-roller' can be used to download (or copy) a generic LliureX 25 image to upgrade isystems from LliureX 23 OEM instalation.
+
+## Saved files and settings from original system
+
+part-roller preserves and prepares some date from actual system before an image file is restored. This include (some) user and group credentials and essential files.
+
+This data is copied to the chboot partition BEFORE booting into recovery mode when part-roller is used with the chboot command 'chbootmgr prepare'.
+
+This feature provides 2 advantages:
+
+ - Continue with image restore in the event that the process is interrupted due to a power cut or any other incident
+ - Automate and minimise manual configuration of the new system, whilst retaining the essential settings of the previous OS.
+ 
+The preserved data include:
+
+### User and group accounts
+
+### Files
+
+> NOTE: When part-roller runs in mode 'restore-from-url', the partclone image is read from network, but 'saved-users' and 'saved-files' directories and files must reside **locally in the chboot partition**. There is no option to get this data from network.
+
 
 ## Operation
 
