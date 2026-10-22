@@ -531,6 +531,16 @@ _get_local_users(){
 	[ -z "$1" ] || FILE="$1"    
         _get_local_ids $UID_MIN $UID_MAX $FILE
 }                       
+
+_is_local_user(){
+	grep -q "^${1}:" "$rootmnt/etc/passwd" || return 1
+	return 0
+}
+                        
+_is_local_group(){
+	grep -q "^${1}:" "$rootmnt/etc/group" || return 1
+	return 0
+}
                         
 _get_local_groups(){     
 	FILE="$rootmnt/etc/group"
@@ -645,14 +655,30 @@ chboot_cp_root_files(){
 		mkdir -p "$TAGS_DIR"
 	fi
 	SOURCE_DIR="${chbmnt}/${CHB_DIR}/${CHB_DATA_DIR}/saved-files"
-	if _not_empty_dir "${SOURCE_DIR}" ; then
-		# TODO: find a better way to do this ...
-		# TODO: for each file, check existence of user and group and decide what to do ....
+	ORPHAN_DIR="${rootmnt}/chboot-orphan-files"
+	mkdir -p "$ORPHAN_DIR"
+	SOURCE_LIST="${chbmnt}/${CHB_DIR}/${CHB_DATA_DIR}/saved-files.list"
+	if _not_empty_dir "${SOURCE_DIR}" && [ -r "$SOURCE_LIST" ] ; then
 
 		CUR_DIR="$(pwd)"
 		cd ${SOURCE_DIR}
-		cp -a ./ /${rootmnt}/ || rc=$?
+
+		# DONE: for each file, check existence of user and group and decide what to do ....
+		while IFS=":" read m u U g G F ; do
+			TARGET_DIR="${ORPHAN_DIR}"
+			CHOWN_DATA=""
+			# copy to rootfs only if user and group exists
+			if _is_local_user "$u" && _is_local_group "$g" ; then
+				TARGET_DIR="${rootmnt}"
+				# use name values for user and group
+				CHOWN_DATA="$u:$g"
+			fi
+			
+			cp -a "./$F" /$TARGET_DIR/ || rc=$?
+			[ -z "$CHOWN_DATA" ] || chown "$CHOWN_DATA" /$TARGET_DIR/$F
+		done < "$SOURCE_LIST"
 		cd "$CUR_DIR"
+
 	else
 		rc=0
 	fi
