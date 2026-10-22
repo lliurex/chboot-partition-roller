@@ -268,9 +268,18 @@ install_boot_files(){
 	return $rc
 }
 
+get_file_data(){
+	F="$1"
+	# TODO: parse all components
+	# get octal permissions, user and group owner (name and numeric id) of file
+	echo "$(stat -c "%a:%U:%u:%G:%g" "$F"):$F"
+}
+
+
 save_files(){
 	FILE_LIST="$1"
 	DEST_DIR="$2/saved-files"
+	DEST_LIST="$2/saved-files.list"
 	mkdir -p "$DEST_DIR"
 	#DEST_DIR="$CHBOOT_DIR/files"
 	#echo "Preserve files from $FILE_LIST ..."
@@ -280,10 +289,12 @@ save_files(){
 	rm -fr "$DEST_DIR"
 
 	mkdir -p "$DEST_DIR"
-	#TODO: ... prepare chboot-orphan-files ...
 	for f in $FILE_LIST $FORCE_FILES ; do
 		rsync -a --files-from=$f / "$DEST_DIR" || error_msg "Unable to preserve files"
 	done
+	# DONE: ... prepare for chboot-orphan-files ...
+	#           format -> octalmode:username:UID:groupname:GID:fullpath
+	find "$DEST_DIR" -xtype f -printf "%m:%u:%U:%g:%G:/%P\n" > "$DEST_LIST"
 
 	# echo "Preserve tags ..."
 	TAGS_DIR_LIST="/etc/lliurex-auto-upgrade/tags"
