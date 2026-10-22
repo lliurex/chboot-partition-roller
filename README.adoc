@@ -44,6 +44,8 @@ This feature provides 2 advantages:
  - Continue with image restore in the event that the process is interrupted due to a power cut or any other incident
  - Automate and minimise manual configuration of the new system, whilst retaining the essential settings of the previous OS.
  
+> NOTE: When part-roller runs in mode 'restore-from-url', the partclone image is read from network, but 'saved-users' and 'saved-files' directories and files must reside **locally in the chboot partition**. There is no option to get this data from network.
+
 The preserved data include:
 
 ### User and group accounts
@@ -62,6 +64,12 @@ In this mode, part-roller creates a directory 'data/saved-users' with:
 
 - system and non-system groups ownership for non-system local users
 
+By default **ALL** non system user and group accounts are saved, but this behaviour can be changed with 2 configuration variables:
+
+- 'PR_USERS_BLACKLIST'  -> Blank separated list of local users to be excluded from save/restore
+
+- 'PR_GROUP_BLACKLIST'  -> Blank separated list of local groups to be excluded from save/restore
+
 After the image is restored, part-roller perfoms the following actions:
 
 - remove **ALL** local non-system users and groups
@@ -76,11 +84,16 @@ After the image is restored, part-roller perfoms the following actions:
 
   * restore system groups membership for local users
 
-In addition, part-roller save and restore 
+There is an additional configuration variable 'PR_SYS_USERS_LIST' that can be used to save '/etc/shadow' data for certain system users.
+
+part-roller does not create system accounts after restoring an image but the saved passwords will be restored  **ONLY** if the selected user accounts are present in the restored image.
+
+The default value for this variable is:
+
+'PR_SYS_USERS_LIST="root"'
 
 ### Files
 
-> NOTE: When part-roller runs in mode 'restore-from-url', the partclone image is read from network, but 'saved-users' and 'saved-files' directories and files must reside **locally in the chboot partition**. There is no option to get this data from network.
 
 
 ## Operation
