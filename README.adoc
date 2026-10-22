@@ -68,13 +68,13 @@ After the image is restored, part-roller perfoms the following actions:
 
 - use the 'saved-users' data to.
 
-    - create local grups with the original GIDs and gshadow info
+  - create local grups with the original GIDs and gshadow info
 
-    - create local users with the original UIDs and shadow info
+  - create local users with the original UIDs and shadow info
 
-    - restore non-system groups membership for local users
+  - restore non-system groups membership for local users
 
-    - restore system groups membership for local users
+  - restore system groups membership for local users
 
 In addition, part-roller save and restore 
 
