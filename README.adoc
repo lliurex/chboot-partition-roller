@@ -56,7 +56,7 @@ This feature depends of the configuration variable 'PR_SAVEUSERS_MODE' (but, at 
 
 #### 'saved-users' mode
 
-In this mode, part-roller creates a directory 'data/saved-users' with:
+In this mode, part-roller creates a directory 'data/saved-users' to store:
 
 - user and group fields from '/etc/passwd' and '/etc/group' files
 
@@ -82,7 +82,7 @@ After the image is restored, part-roller perfoms the following actions:
 
   * restore non-system groups membership for local users
 
-  * restore system groups membership for local users
+  * restore system groups membership for local users **ONLY** if required system groups are already present in the image
 
 There is an additional configuration variable 'PR_SYS_USERS_LIST' that can be used to save '/etc/shadow' data for certain system users.
 
