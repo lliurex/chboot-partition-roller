@@ -89,6 +89,8 @@ load_config(){
 	if [ "$PR_CHBOOT_MODE" = "restore-from-url" ] ; then
 		[ "$PR_DIRECT_URL_IMG" ] error_msg "<PR_DIRECT_URL_IMG> is required for mode '$PR_CHBOOT_MODE'" "$ERR_TITLE"
 		CHBOOT_URL="$PR_DIRECT_URL_IMG"
+	else
+		CHBOOT_URL=""
 	fi
 
 
@@ -197,9 +199,9 @@ chboot_entry(){
 
 	cat <<EOF
 set timeout=10
-#search --no-floppy --fs-uuid --set=root ${CHBOOT_UUID}
+#search --no-floppy --fs-uuid --set=chboot ${CHBOOT_UUID}
 
-menuentry 'CHBOOT: ${CHBOOT_TITLE} (${KERNEL_VERSION})' --class lliurex --class gnu-linux --class gnu --class os \$menuentry_id_option 'gnulinux-${KERNEL_VERSION}-advanced-${ROOT_UUID}' {
+menuentry '${CHBOOT_TITLE} (${KERNEL_VERSION})' --class lliurex --class gnu-linux --class gnu --class os \$menuentry_id_option 'gnulinux-${KERNEL_VERSION}-advanced-${ROOT_UUID}' {
         # recordfail
         # load_video
         # gfxmode \$linux_gfx_mode
@@ -209,9 +211,9 @@ menuentry 'CHBOOT: ${CHBOOT_TITLE} (${KERNEL_VERSION})' --class lliurex --class 
         insmod ext2
         search --no-floppy --fs-uuid --set=root ${CHBOOT_UUID}
         echo    'Loading Linux ${KERNEL_VERSION} for CHBOOT part-roller ${CFG_NAME} ...'
-        linux   \$chboot/${BOOT_PATH}/vmlinuz-${KERNEL_VERSION} root=PARTUUID=${ROOT_PARTUUID} ro boot=partroller chb.ncurses chb.uuid=${ROOT_UUID} chb.efi=UUID=${EFI_UUID} chb.dev=UUID=${CHBOOT_UUID} chb.dir=${CHBOOT_PATH} chb.imgdir=${CHBOOT_IMG_PATH} $CHBOOT_IMG_OPTION $CHBOOT_URL_OPTION net.ifnames=0 rw $vt_handoff
+	linux   (\$chboot)${BOOT_PATH}/vmlinuz-${KERNEL_VERSION} root=PARTUUID=${ROOT_PARTUUID} ro boot=partroller chb.ncurses chb.uuid=${ROOT_UUID} chb.efi=UUID=${EFI_UUID} chb.dev=UUID=${CHBOOT_UUID} chb.dir=${CHBOOT_PATH} chb.imgdir=${CHBOOT_IMG_PATH} $CHBOOT_IMG_OPTION $CHBOOT_URL_OPTION net.ifnames=0 rw $vt_handoff
         echo    'Loading initial ramdisk ...'
-        initrd  \$chboot/${BOOT_PATH}/${CHBOOT_INITRD}
+	initrd  (\$chboot)${BOOT_PATH}/${CHBOOT_INITRD}
 }
 EOF
 
@@ -292,9 +294,6 @@ save_files(){
 	for f in $FILE_LIST $FORCE_FILES ; do
 		rsync -a --files-from=$f / "$DEST_DIR" || error_msg "Unable to preserve files"
 	done
-	# DONE: ... prepare for chboot-orphan-files ...
-	#           format -> octalmode:username:UID:groupname:GID:fullpath
-	find "$DEST_DIR" -xtype f -printf "%m:%u:%U:%g:%G:/%P\n" > "$DEST_LIST"
 
 	# echo "Preserve tags ..."
 	TAGS_DIR_LIST="/etc/lliurex-auto-upgrade/tags"
@@ -302,6 +301,9 @@ save_files(){
 	for d in $TAGS_DIR_LIST ; do
 		find $d |grep -v "\." |rsync -a --files-from=- / "$DEST_DIR" || error_msg "Unable to preserve tags" "Warning"
 	done
+	# DONE: ... prepare for chboot-orphan-files ...
+	#           format -> octalmode:username:UID:groupname:GID:fullpath
+	find "$DEST_DIR" -xtype f -printf "%m:%u:%U:%g:%G:/%P\n" > "$DEST_LIST"
 }
 
 
@@ -362,7 +364,7 @@ save_users(){
 	INFO_FILE="users.cfg"
 
 	# remove pre existing data
-	rm -fr $DEST_DIR"
+	rm -fr "$DEST_DIR"
 	# check configuration mode
 	[ "$LOCAL_USERS_MODE" = "saved-users" ] || return 0
 
@@ -462,7 +464,7 @@ case "$ACTION" in
 		install_boot_files "$CHBOOT_BASE_DIR/boot" || error_msg "Unable to install vmlinuz and initrd files in $CHBOOT_BASE_DIR/boot"
 		;;
 	gengrub)
-		gen_grub_cfg "$CHBOOT_BASE_DIR" || error_msg "Unable to generate grub.cfg file in $CHBOOT_BASE_DIR"
+		gen_grub_cfg "$CHBOOT_BASE_DIR" "$CHBOOT_IMG_NAME" "$CHBOOT_URL" || error_msg "Unable to generate grub.cfg file in $CHBOOT_BASE_DIR"
 		;;
 	installgrub)
 		install_grub "$CHBOOT_BASE_DIR/boot" || error_msg "Unable to install grub in $CHBOOT_BASE_DIR"
