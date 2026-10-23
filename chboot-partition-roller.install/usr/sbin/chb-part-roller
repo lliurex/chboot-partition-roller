@@ -360,6 +360,12 @@ save_users(){
 	GSHADOW_FILE="gshadow"
 	USER_SYSGROUPS="user-sysgroups"
 	INFO_FILE="users.cfg"
+
+	# remove pre existing data
+	rm -fr $DEST_DIR"
+	# check configuration mode
+	[ "$LOCAL_USERS_MODE" = "saved-users" ] || return 0
+
 	mkdir -p "$DEST_DIR"
 
 	# create files and restrict access
