@@ -52,7 +52,8 @@ The preserved data include:
 
 > NOTE: System users and groups are usually created and managed when software packages are installed, so details as the UID or GID may vary between different systems, depending on the packages installed or the order in which they were installed. **part-roller does not manage system accounts** to avoid potential problems when installing software in the restored system. **Only local non system users and groups of the original system can be preserved to be restored after image inatallation.** System or non system users and groups configuration is read from '/etc/login.defs' file.
 
-This feature depends of the configuration variable 'PR_SAVEUSERS_MODE' (but, at this moment, the only allowed value is 'saved-users')
+This feature depends of the configuration variable 'PR_SAVEUSERS_MODE' but, at this moment, the only allowed value is 'saved-users'. This is also the default value if the variable is empty or not present in the configuration file.
+
 
 #### 'saved-users' mode
 
@@ -92,9 +93,19 @@ The default value for this variable is:
 
 'PR_SYS_USERS_LIST="root"'
 
+#### Other modes for the SAVE USERS feature
+
+If 'PR_SAVEUSERS_MODE' is not empty but value is not 'saved-users', part-roller does not generate any data about local users.
+
+> NOTE: The behaviour following the restoration of an image is not governed by the variable but by the presence of files within the `saved-users` directory. If the directory does not exist or the content is incomplete, all user information is ignored, and the accounts and credentials defined in the restored image are retained.
+
 ### Files
 
+As well as user files, part-Roller can preserve files from the original system. User and group ownership and permission bits arew also preserved. Files and metadata are stored in 'data/saved-files directory' and 'data/saved-files.list file'.
 
+The required files must be referenced in a text file (one file per line). The full path of this file can be configured in the variable 'PR_SAVEFILES_LIST'. Default value for this variable is the the supplied '/usr/share/chboot-partition-roller/saved-files.list'.
+
+Regardless of this adjustment, part-roller stores lliurex auto-upgrade tags (if any) and files included in the file '/usr/share/chboot-partition-roller/force-files.list'. At present, the only file included in this list is: '/etc/fstab'.
 
 ## Operation
 
